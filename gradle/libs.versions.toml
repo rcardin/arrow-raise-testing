@@ -2,9 +2,12 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
+arrow-core = "1.2.4"
 junit-jupiter-engine = "5.10.0"
 
+
 [libraries]
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow-core" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter-engine" }
 
 [plugins]
