@@ -1,6 +1,5 @@
 package `in`.rcard.arrow.raise.testing
 
-import arrow.core.Either
 import arrow.core.raise.Raise
 
 sealed interface DomainError
@@ -44,8 +43,13 @@ data class CreatePortfolio(
 
 interface CreatePortfolioUseCase {
     context (Raise<DomainError>)
-    suspend fun createPortfolio(model: CreatePortfolio): Either<DomainError, PortfolioId>
+    suspend fun createPortfolio(model: CreatePortfolio): PortfolioId
 }
+
+fun createPortfolioUseCase(): CreatePortfolioUseCase =
+    object : CreatePortfolioUseCase {
+        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId = TODO()
+    }
 
 fun main() {
 }
