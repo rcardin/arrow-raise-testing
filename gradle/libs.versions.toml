@@ -5,12 +5,16 @@
 arrow-core = "1.2.4"
 junit-jupiter-engine = "5.10.0"
 kotlinx-coroutines = "1.9.0-RC"
+assertj-core = "3.26.3"
+assertj-arrow-core = "1.0.0"
 
 
 [libraries]
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow-core" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "kotlinx-coroutines" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj-core" }
+assertj-arrow-core = { module = "in.rcard:assertj-arrow-core", version.ref = "assertj-arrow-core" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter-engine" }
 
 [plugins]

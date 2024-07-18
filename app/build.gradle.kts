@@ -23,10 +23,10 @@ repositories {
 dependencies {
     implementation(libs.arrow.core)
     implementation(libs.kotlinx.coroutines.core)
-    // Use the Kotlin JUnit 5 integration.
     testImplementation(libs.kotlinx.coroutines.test)
-    // Use the JUnit 5 integration.
     testImplementation(libs.junit.jupiter.engine)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.assertj.arrow.core)
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
