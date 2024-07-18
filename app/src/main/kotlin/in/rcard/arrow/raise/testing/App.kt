@@ -48,6 +48,7 @@ interface CreatePortfolioUseCase {
 
 fun createPortfolioUseCase(): CreatePortfolioUseCase =
     object : CreatePortfolioUseCase {
+        context(Raise<DomainError>)
         override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId = TODO()
     }
 
