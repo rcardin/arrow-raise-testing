@@ -49,7 +49,7 @@ interface CreatePortfolioUseCase {
 fun createPortfolioUseCase(): CreatePortfolioUseCase =
     object : CreatePortfolioUseCase {
         context(Raise<DomainError>)
-        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId = TODO()
+        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
     }
 
 fun main() {
