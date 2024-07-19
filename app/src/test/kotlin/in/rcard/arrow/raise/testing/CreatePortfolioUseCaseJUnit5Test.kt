@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class CreatePortfolioUseCaseTest {
+internal class CreatePortfolioUseCaseJUnit5Test {
     private val underTest = createPortfolioUseCase()
 
     @Test

@@ -27,7 +27,7 @@ dependencies {
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.assertj.core)
     testImplementation(libs.assertj.arrow.core)
-    testImplementation(libs.kotest.jupiter.engine)
+    testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.arrow)
     testImplementation(libs.kotest.arrow.fx)
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
