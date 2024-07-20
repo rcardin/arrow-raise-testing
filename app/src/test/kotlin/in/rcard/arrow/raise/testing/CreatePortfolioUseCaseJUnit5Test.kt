@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class CreatePortfolioUseCaseJUnit5Test {
-    private val underTest = createPortfolioUseCase()
+    private val underTest: CreatePortfolioUseCase = createPortfolioUseCase()
 
     @Test
     internal fun `given a userId and an initial amount, when executed, then it create the portfolio`() =
