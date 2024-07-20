@@ -42,12 +42,14 @@ data class CreatePortfolio(
 )
 
 interface CreatePortfolioUseCase {
-    suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
+    context (Raise<DomainError>)
+    suspend fun createPortfolio(model: CreatePortfolio): PortfolioId
 }
 
 fun createPortfolioUseCase(): CreatePortfolioUseCase =
     object : CreatePortfolioUseCase {
-        override suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
+        context(Raise<DomainError>)
+        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
     }
 
 fun main() {
