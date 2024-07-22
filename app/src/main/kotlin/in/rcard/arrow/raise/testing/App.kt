@@ -52,5 +52,14 @@ fun createPortfolioUseCase(): CreatePortfolioUseCase =
         override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
     }
 
+interface CreatePortfolioUseCaseWoContextReceivers {
+    suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
+}
+
+fun createPortfolioUseCaseWoContextReceivers(): CreatePortfolioUseCaseWoContextReceivers =
+    object : CreatePortfolioUseCaseWoContextReceivers {
+        override suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
+    }
+
 fun main() {
 }
