@@ -2,7 +2,11 @@ package `in`.rcard.arrow.raise.testing
 
 import arrow.core.raise.Raise
 
-sealed interface DomainError
+sealed interface DomainError {
+    data class PortfolioAlreadyExists(
+        val userId: UserId,
+    ) : DomainError
+}
 
 @JvmInline
 value class UserId(
@@ -42,14 +46,24 @@ data class CreatePortfolio(
 )
 
 interface CreatePortfolioUseCase {
-    context (Raise<DomainError>)
+    context(Raise<DomainError>)
     suspend fun createPortfolio(model: CreatePortfolio): PortfolioId
 }
 
-fun createPortfolioUseCase(): CreatePortfolioUseCase =
+interface CountUserPortfoliosPort {
+    context(Raise<DomainError>)
+    suspend fun countByUserId(userId: UserId): Int
+}
+
+fun createPortfolioUseCase(countUserPortfolios: CountUserPortfoliosPort): CreatePortfolioUseCase =
     object : CreatePortfolioUseCase {
         context(Raise<DomainError>)
-        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
+        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId =
+            if (countUserPortfolios.countByUserId(model.userId) > 0) {
+                raise(DomainError.PortfolioAlreadyExists(model.userId))
+            } else {
+                PortfolioId("1")
+            }
     }
 
 interface CreatePortfolioUseCaseWoContextReceivers {
