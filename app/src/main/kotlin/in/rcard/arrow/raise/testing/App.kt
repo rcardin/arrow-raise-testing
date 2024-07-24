@@ -6,6 +6,10 @@ sealed interface DomainError {
     data class PortfolioAlreadyExists(
         val userId: UserId,
     ) : DomainError
+
+    data class GenericError(
+        val throwable: Throwable,
+    ) : DomainError
 }
 
 @JvmInline
