@@ -4,6 +4,7 @@ import arrow.core.Either
 import arrow.core.raise.Raise
 import arrow.core.raise.either
 import arrow.core.raise.fold
+import `in`.rcard.arrow.raise.testing.DomainError.GenericError
 import `in`.rcard.arrow.raise.testing.DomainError.PortfolioAlreadyExists
 import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
@@ -71,25 +72,39 @@ internal class CreatePortfolioUseCaseKotestTest :
                 actualResult.shouldBeRight(PortfolioId("1"))
             }
 
+            should("create a portfolio for a user (using mockk and either") {
+
+                val countUserPortfoliosMock: CountUserPortfoliosPort = mockk()
+                val underTestWithMock = createPortfolioUseCase(countUserPortfoliosMock)
+                val actualResult: Either<DomainError, PortfolioId> =
+                    either {
+                        coEvery {
+                            countUserPortfoliosMock.countByUserId(UserId("bob"))
+                        } returns 0
+                        underTestWithMock.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                    }
+
+                actualResult.shouldBeRight(PortfolioId("1"))
+            }
+
             should("return a PortfolioAlreadyExists error for an existing user") {
 
                 val countUserPortfoliosMock: CountUserPortfoliosPort = mockk()
                 val underTestWithMock = createPortfolioUseCase(countUserPortfoliosMock)
 
-//                coEvery {
-//                    with(any<Raise<DomainError>>()) {
-//                        countUserPortfoliosMock.countByUserId(UserId("bob"))
-//                    }
-//                } answers {
-//                    raise(DomainError.PortfolioAlreadyExists(UserId("bob")))
-//                }
-
+                val exception = RuntimeException("Ooops!")
                 val actualResult: Either<DomainError, PortfolioId> =
                     either {
+                        coEvery {
+                            countUserPortfoliosMock.countByUserId(UserId("bob"))
+                        } answers {
+                            raise(GenericError(exception))
+                        }
+
                         underTestWithMock.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                     }
 
-                actualResult.shouldBeLeft(PortfolioAlreadyExists(UserId("bob")))
+                actualResult.shouldBeLeft(GenericError(exception))
             }
         }
     })
