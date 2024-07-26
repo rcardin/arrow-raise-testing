@@ -4,12 +4,15 @@ import arrow.core.Either
 import arrow.core.raise.Raise
 import arrow.core.raise.either
 import arrow.core.raise.fold
+import `in`.rcard.arrow.raise.testing.DomainError.GenericError
 import `in`.rcard.assertj.arrowcore.EitherAssert
 import `in`.rcard.assertj.arrowcore.RaiseAssert
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
 
 private val fakeCountUserPortfolios: CountUserPortfoliosPort =
     object : CountUserPortfoliosPort {
@@ -63,4 +66,22 @@ internal class CreatePortfolioUseCaseJUnit5Test {
                     )
                 }
             }.succeedsWith(PortfolioId("1"))
+
+    @Test
+    fun `given a userId and an initial amount, when executed with error, then propagates the error properly`() {
+        runTest {
+            val exception = RuntimeException("Ooops!")
+            val actualResult =
+                either {
+                    val countUserPortfoliosPort =
+                        mock<CountUserPortfoliosPort> {
+                            onBlocking { countByUserId(UserId("bob")) } doAnswer { raise(GenericError(exception)) }
+                        }
+                    val underTest = createPortfolioUseCase(countUserPortfoliosPort)
+                    underTest.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                }
+
+            EitherAssert.assertThat(actualResult).containsOnLeft(GenericError(exception))
+        }
+    }
 }
