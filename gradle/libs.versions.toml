@@ -10,6 +10,7 @@ assertj-arrow-core = "1.0.0"
 kotest-arrow = "1.4.0"
 kotest-runner-junit5 = "5.9.0"
 mockk = "1.13.12"
+mockito-kotlin = "5.4.0"
 
 
 [libraries]
@@ -23,6 +24,7 @@ kotest-arrow = { module = "io.kotest.extensions:kotest-assertions-arrow", versio
 kotest-arrow-fx = { module = "io.kotest.extensions:kotest-assertions-arrow-fx-coroutines", version.ref = "kotest-arrow" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest-runner-junit5" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
 [plugins]
 jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.0.0" }

@@ -31,6 +31,7 @@ dependencies {
     testImplementation(libs.kotest.arrow)
     testImplementation(libs.kotest.arrow.fx)
     testImplementation(libs.mockk)
+    testImplementation(libs.mockito.kotlin)
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
