@@ -1,6 +1,7 @@
 package `in`.rcard.arrow.raise.testing
 
 import arrow.core.raise.Raise
+import arrow.core.raise.ensure
 
 sealed interface DomainError {
     data class PortfolioAlreadyExists(
@@ -62,12 +63,12 @@ interface CountUserPortfoliosPort {
 fun createPortfolioUseCase(countUserPortfolios: CountUserPortfoliosPort): CreatePortfolioUseCase =
     object : CreatePortfolioUseCase {
         context(Raise<DomainError>)
-        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId =
-            if (countUserPortfolios.countByUserId(model.userId) > 0) {
+        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId {
+            ensure(countUserPortfolios.countByUserId(model.userId) == 0) {
                 raise(DomainError.PortfolioAlreadyExists(model.userId))
-            } else {
-                PortfolioId("1")
             }
+            return PortfolioId("1")
+        }
     }
 
 interface CreatePortfolioUseCaseWoContextReceivers {
