@@ -51,21 +51,20 @@ data class CreatePortfolio(
 )
 
 interface CreatePortfolioUseCase {
-    context(Raise<DomainError>)
-    suspend fun createPortfolio(model: CreatePortfolio): PortfolioId
+    suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
 }
 
 interface CountUserPortfoliosPort {
-    context(Raise<DomainError>)
-    suspend fun countByUserId(userId: UserId): Int
+    suspend fun Raise<DomainError>.countByUserId(userId: UserId): Int
 }
 
 fun createPortfolioUseCase(countUserPortfolios: CountUserPortfoliosPort): CreatePortfolioUseCase =
     object : CreatePortfolioUseCase {
-        context(Raise<DomainError>)
-        override suspend fun createPortfolio(model: CreatePortfolio): PortfolioId {
-            ensure(countUserPortfolios.countByUserId(model.userId) == 0) {
-                raise(DomainError.PortfolioAlreadyExists(model.userId))
+        override suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId {
+            with(countUserPortfolios) {
+                ensure(countByUserId(model.userId) == 0) {
+                    raise(DomainError.PortfolioAlreadyExists(model.userId))
+                }
             }
             return PortfolioId("1")
         }
