@@ -30,20 +30,7 @@ value class PortfolioId(
 @JvmInline
 value class Money(
     val amount: Double,
-) {
-//    operator fun plus(money: Money): Money = Money(this.amount + money.amount)
-//
-//    operator fun minus(money: Money): Money = Money(this.amount - money.amount)
-//
-//    operator fun times(quantity: Quantity): Money = Money(this.amount * quantity.amount)
-//
-//    operator fun compareTo(money: Money): Int =
-//        when {
-//            this.amount > money.amount -> 1
-//            this.amount < money.amount -> -1
-//            else -> 0
-//        }
-}
+)
 
 data class CreatePortfolio(
     val userId: UserId,
@@ -51,16 +38,16 @@ data class CreatePortfolio(
 )
 
 interface CreatePortfolioUseCase {
-    suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
+    fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
 }
 
 interface CountUserPortfoliosPort {
-    suspend fun Raise<DomainError>.countByUserId(userId: UserId): Int
+    fun Raise<DomainError>.countByUserId(userId: UserId): Int
 }
 
 fun createPortfolioUseCase(countUserPortfolios: CountUserPortfoliosPort): CreatePortfolioUseCase =
     object : CreatePortfolioUseCase {
-        override suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId {
+        override fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId {
             with(countUserPortfolios) {
                 ensure(countByUserId(model.userId) == 0) {
                     raise(DomainError.PortfolioAlreadyExists(model.userId))
@@ -71,12 +58,12 @@ fun createPortfolioUseCase(countUserPortfolios: CountUserPortfoliosPort): Create
     }
 
 interface CreatePortfolioUseCaseWoContextReceivers {
-    suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
+    fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
 }
 
 fun createPortfolioUseCaseWoContextReceivers(): CreatePortfolioUseCaseWoContextReceivers =
     object : CreatePortfolioUseCaseWoContextReceivers {
-        override suspend fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
+        override fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
     }
 
 fun main() {
