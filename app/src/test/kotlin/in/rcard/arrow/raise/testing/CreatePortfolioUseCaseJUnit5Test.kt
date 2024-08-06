@@ -7,8 +7,6 @@ import arrow.core.raise.fold
 import `in`.rcard.arrow.raise.testing.DomainError.GenericError
 import `in`.rcard.assertj.arrowcore.EitherAssert
 import `in`.rcard.assertj.arrowcore.RaiseAssert
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doAnswer
@@ -16,72 +14,70 @@ import org.mockito.kotlin.mock
 
 private val fakeCountUserPortfolios: CountUserPortfoliosPort =
     object : CountUserPortfoliosPort {
-        context(Raise<DomainError>)
-        override suspend fun countByUserId(userId: UserId): Int = if (userId == UserId("bob")) 0 else 1
+        override fun Raise<DomainError>.countByUserId(userId: UserId): Int = if (userId == UserId("bob")) 0 else 1
     }
 
 internal class CreatePortfolioUseCaseJUnit5Test {
     private val underTest = createPortfolioUseCase(fakeCountUserPortfolios)
 
     @Test
-    internal fun `given a userId and an initial amount, when executed, then it create the portfolio`() =
-        runTest {
+    internal fun `given a userId and an initial amount, when executed, then it create the portfolio`() {
+        with(underTest) {
             val actualResult: Either<DomainError, PortfolioId> =
                 either {
-                    underTest.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                    createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                 }
             Assertions.assertThat(actualResult.getOrNull()).isEqualTo(PortfolioId("1"))
         }
+    }
 
     @Test
-    internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using AssertJ-Arrow-Core)`() =
-        runTest {
+    internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using AssertJ-Arrow-Core)`() {
+        with(underTest) {
             val actualResult: Either<DomainError, PortfolioId> =
                 either {
-                    underTest.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                    createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                 }
             EitherAssert.assertThat(actualResult).containsOnRight(PortfolioId("1"))
         }
+    }
 
     @Test
-    internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using fold)`() =
-        runTest {
-            fold(
-                block = { underTest.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) },
-                recover = { Assertions.fail("The use case should not fail") },
-                transform = { Assertions.assertThat(it).isEqualTo(PortfolioId("1")) },
-            )
+    internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using fold)`() {
+        with(underTest) {
+            {
+                fold(
+                    block = { createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) },
+                    recover = { Assertions.fail("The use case should not fail") },
+                    transform = { Assertions.assertThat(it).isEqualTo(PortfolioId("1")) },
+                )
+            }
         }
+    }
 
     @Test
-    internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using RaiseAssert)`() =
-        RaiseAssert
-            .assertThat {
-                runBlocking {
-                    underTest.createPortfolio(
-                        CreatePortfolio(
-                            UserId("bob"),
-                            Money(1000.0),
-                        ),
-                    )
-                }
-            }.succeedsWith(PortfolioId("1"))
+    internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using RaiseAssert)`() {
+        with(underTest) {
+            RaiseAssert
+                .assertThat { createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) }
+                .succeedsWith(PortfolioId("1"))
+        }
+    }
 
     @Test
     fun `given a userId and an initial amount, when executed with error, then propagates the error properly`() {
-        runTest {
-            val exception = RuntimeException("Ooops!")
-            val actualResult =
-                either {
-                    val countUserPortfoliosPort =
-                        mock<CountUserPortfoliosPort> {
-                            onBlocking { countByUserId(UserId("bob")) } doAnswer { raise(GenericError(exception)) }
-                        }
-                    val underTest = createPortfolioUseCase(countUserPortfoliosPort)
-                    underTest.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+        val exception = RuntimeException("Ooops!")
+        val actualResult =
+            either {
+                val countUserPortfoliosPort =
+                    mock<CountUserPortfoliosPort> {
+                        onBlocking { countByUserId(UserId("bob")) } doAnswer { raise(GenericError(exception)) }
+                    }
+                with(createPortfolioUseCase(countUserPortfoliosPort)) {
+                    createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                 }
+            }
 
-            EitherAssert.assertThat(actualResult).containsOnLeft(GenericError(exception))
-        }
+        EitherAssert.assertThat(actualResult).containsOnLeft(GenericError(exception))
     }
 }

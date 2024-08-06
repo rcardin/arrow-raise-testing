@@ -16,8 +16,7 @@ import kotlin.test.DefaultAsserter.fail
 
 private val fakeCountUserPortfolios: CountUserPortfoliosPort =
     object : CountUserPortfoliosPort {
-        context(Raise<DomainError>)
-        override suspend fun countByUserId(userId: UserId): Int = if (userId == UserId("bob")) 0 else 1
+        override fun Raise<DomainError>.countByUserId(userId: UserId): Int = if (userId == UserId("bob")) 0 else 1
     }
 
 internal class CreatePortfolioUseCaseKotestTest :
@@ -27,30 +26,36 @@ internal class CreatePortfolioUseCaseKotestTest :
         context("The create portfolio use case") {
 
             should("raise a PortfolioAlreadyExists") {
-                val alice = UserId("alice")
-                val actualResult: Either<DomainError, PortfolioId> =
-                    either {
-                        underTest.createPortfolio(CreatePortfolio(alice, Money(1000.0)))
-                    }
+                with(underTest) {
+                    val alice = UserId("alice")
+                    val actualResult: Either<DomainError, PortfolioId> =
+                        either {
+                            createPortfolio(CreatePortfolio(alice, Money(1000.0)))
+                        }
 
-                actualResult.shouldBeLeft(PortfolioAlreadyExists(alice))
+                    actualResult.shouldBeLeft(PortfolioAlreadyExists(alice))
+                }
             }
 
             should("create a portfolio for a user") {
-                val actualResult: Either<DomainError, PortfolioId> =
-                    either {
-                        underTest.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
-                    }
+                with(underTest) {
+                    val actualResult: Either<DomainError, PortfolioId> =
+                        either {
+                            createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                        }
 
-                actualResult.shouldBeRight(PortfolioId("1"))
+                    actualResult.shouldBeRight(PortfolioId("1"))
+                }
             }
 
             should("create a portfolio for a user (using fold)") {
-                fold(
-                    block = { underTest.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) },
-                    recover = { fail("The use case should not fail") },
-                    transform = { it.shouldBe(PortfolioId("1")) },
-                )
+                with(underTest) {
+                    fold(
+                        block = { createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) },
+                        recover = { fail("The use case should not fail") },
+                        transform = { it.shouldBe(PortfolioId("1")) },
+                    )
+                }
             }
 
             should("create a portfolio for a user (using mockk") {
@@ -59,14 +64,18 @@ internal class CreatePortfolioUseCaseKotestTest :
                 val underTestWithMock = createPortfolioUseCase(countUserPortfoliosMock)
 
                 coEvery {
-                    with(any<Raise<DomainError>>()) {
-                        countUserPortfoliosMock.countByUserId(UserId("bob"))
+                    with(countUserPortfoliosMock) {
+                        with(any<Raise<DomainError>>()) {
+                            countByUserId(UserId("bob"))
+                        }
                     }
                 } returns 0
 
                 val actualResult: Either<DomainError, PortfolioId> =
-                    either {
-                        underTestWithMock.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                    with(underTestWithMock) {
+                        either {
+                            createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                        }
                     }
 
                 actualResult.shouldBeRight(PortfolioId("1"))
@@ -77,11 +86,15 @@ internal class CreatePortfolioUseCaseKotestTest :
                 val countUserPortfoliosMock: CountUserPortfoliosPort = mockk()
                 val underTestWithMock = createPortfolioUseCase(countUserPortfoliosMock)
                 val actualResult: Either<DomainError, PortfolioId> =
-                    either {
-                        coEvery {
-                            countUserPortfoliosMock.countByUserId(UserId("bob"))
-                        } returns 0
-                        underTestWithMock.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                    with(underTestWithMock) {
+                        either {
+                            coEvery {
+                                with(countUserPortfoliosMock) {
+                                    countByUserId(UserId("bob"))
+                                }
+                            } returns 0
+                            createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                        }
                     }
 
                 actualResult.shouldBeRight(PortfolioId("1"))
@@ -94,14 +107,18 @@ internal class CreatePortfolioUseCaseKotestTest :
 
                 val exception = RuntimeException("Ooops!")
                 val actualResult: Either<DomainError, PortfolioId> =
-                    either {
-                        coEvery {
-                            countUserPortfoliosMock.countByUserId(UserId("bob"))
-                        } answers {
-                            raise(GenericError(exception))
-                        }
+                    with(underTestWithMock) {
+                        either {
+                            coEvery {
+                                with(countUserPortfoliosMock) {
+                                    countByUserId(UserId("bob"))
+                                }
+                            } answers {
+                                raise(GenericError(exception))
+                            }
 
-                        underTestWithMock.createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                            createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                        }
                     }
 
                 actualResult.shouldBeLeft(GenericError(exception))
