@@ -22,46 +22,47 @@ internal class CreatePortfolioUseCaseJUnit5Test {
 
     @Test
     internal fun `given a userId and an initial amount, when executed, then it create the portfolio`() {
-        with(underTest) {
-            val actualResult: Either<DomainError, PortfolioId> =
-                either {
+        val actualResult: Either<DomainError, PortfolioId> =
+            either {
+                with(underTest) {
                     createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                 }
-            Assertions.assertThat(actualResult.getOrNull()).isEqualTo(PortfolioId("1"))
-        }
+            }
+        Assertions.assertThat(actualResult.getOrNull()).isEqualTo(PortfolioId("1"))
     }
 
     @Test
     internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using AssertJ-Arrow-Core)`() {
-        with(underTest) {
-            val actualResult: Either<DomainError, PortfolioId> =
-                either {
+        val actualResult: Either<DomainError, PortfolioId> =
+            either {
+                with(underTest) {
                     createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                 }
-            EitherAssert.assertThat(actualResult).containsOnRight(PortfolioId("1"))
-        }
+            }
+        EitherAssert.assertThat(actualResult).containsOnRight(PortfolioId("1"))
     }
 
     @Test
     internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using fold)`() {
-        with(underTest) {
-            {
-                fold(
-                    block = { createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) },
-                    recover = { Assertions.fail("The use case should not fail") },
-                    transform = { Assertions.assertThat(it).isEqualTo(PortfolioId("1")) },
-                )
-            }
-        }
+        fold(
+            block = {
+                with(underTest) {
+                    createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                }
+            },
+            recover = { Assertions.fail("The use case should not fail") },
+            transform = { Assertions.assertThat(it).isEqualTo(PortfolioId("1")) },
+        )
     }
 
     @Test
     internal fun `given a userId and an initial amount, when executed, then it create the portfolio (using RaiseAssert)`() {
-        with(underTest) {
-            RaiseAssert
-                .assertThat { createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) }
-                .succeedsWith(PortfolioId("1"))
-        }
+        RaiseAssert
+            .assertThat {
+                with(underTest) {
+                    createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                }
+            }.succeedsWith(PortfolioId("1"))
     }
 
     @Test

@@ -26,36 +26,39 @@ internal class CreatePortfolioUseCaseKotestTest :
         context("The create portfolio use case") {
 
             should("raise a PortfolioAlreadyExists") {
-                with(underTest) {
-                    val alice = UserId("alice")
-                    val actualResult: Either<DomainError, PortfolioId> =
-                        either {
+
+                val alice = UserId("alice")
+                val actualResult: Either<DomainError, PortfolioId> =
+                    either {
+                        with(underTest) {
                             createPortfolio(CreatePortfolio(alice, Money(1000.0)))
                         }
+                    }
 
-                    actualResult.shouldBeLeft(PortfolioAlreadyExists(alice))
-                }
+                actualResult.shouldBeLeft(PortfolioAlreadyExists(alice))
             }
 
             should("create a portfolio for a user") {
-                with(underTest) {
-                    val actualResult: Either<DomainError, PortfolioId> =
-                        either {
+                val actualResult: Either<DomainError, PortfolioId> =
+                    either {
+                        with(underTest) {
                             createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                         }
+                    }
 
-                    actualResult.shouldBeRight(PortfolioId("1"))
-                }
+                actualResult.shouldBeRight(PortfolioId("1"))
             }
 
             should("create a portfolio for a user (using fold)") {
-                with(underTest) {
-                    fold(
-                        block = { createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0))) },
-                        recover = { fail("The use case should not fail") },
-                        transform = { it.shouldBe(PortfolioId("1")) },
-                    )
-                }
+                fold(
+                    block = {
+                        with(underTest) {
+                            createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
+                        }
+                    },
+                    recover = { fail("The use case should not fail") },
+                    transform = { it.shouldBe(PortfolioId("1")) },
+                )
             }
 
             should("create a portfolio for a user (using mockk") {
@@ -72,8 +75,8 @@ internal class CreatePortfolioUseCaseKotestTest :
                 } returns 0
 
                 val actualResult: Either<DomainError, PortfolioId> =
-                    with(underTestWithMock) {
-                        either {
+                    either {
+                        with(underTestWithMock) {
                             createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                         }
                     }
@@ -86,13 +89,14 @@ internal class CreatePortfolioUseCaseKotestTest :
                 val countUserPortfoliosMock: CountUserPortfoliosPort = mockk()
                 val underTestWithMock = createPortfolioUseCase(countUserPortfoliosMock)
                 val actualResult: Either<DomainError, PortfolioId> =
-                    with(underTestWithMock) {
-                        either {
-                            coEvery {
-                                with(countUserPortfoliosMock) {
-                                    countByUserId(UserId("bob"))
-                                }
-                            } returns 0
+                    either {
+                        coEvery {
+                            with(countUserPortfoliosMock) {
+                                countByUserId(UserId("bob"))
+                            }
+                        } returns 0
+
+                        with(underTestWithMock) {
                             createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                         }
                     }
@@ -107,16 +111,16 @@ internal class CreatePortfolioUseCaseKotestTest :
 
                 val exception = RuntimeException("Ooops!")
                 val actualResult: Either<DomainError, PortfolioId> =
-                    with(underTestWithMock) {
-                        either {
-                            coEvery {
-                                with(countUserPortfoliosMock) {
-                                    countByUserId(UserId("bob"))
-                                }
-                            } answers {
-                                raise(GenericError(exception))
+                    either {
+                        coEvery {
+                            with(countUserPortfoliosMock) {
+                                countByUserId(UserId("bob"))
                             }
+                        } answers {
+                            raise(GenericError(exception))
+                        }
 
+                        with(underTestWithMock) {
                             createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))
                         }
                     }
