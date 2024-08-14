@@ -72,7 +72,7 @@ internal class CreatePortfolioUseCaseJUnit5Test {
             either {
                 val countUserPortfoliosPort =
                     mock<CountUserPortfoliosPort> {
-                        onBlocking { countByUserId(UserId("bob")) } doAnswer { raise(GenericError(exception)) }
+                        on { countByUserId(UserId("bob")) } doAnswer { raise(GenericError(exception)) }
                     }
                 with(createPortfolioUseCase(countUserPortfoliosPort)) {
                     createPortfolio(CreatePortfolio(UserId("bob"), Money(1000.0)))

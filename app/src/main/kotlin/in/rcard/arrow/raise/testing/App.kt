@@ -57,13 +57,15 @@ fun createPortfolioUseCase(countUserPortfolios: CountUserPortfoliosPort): Create
         }
     }
 
-interface CreatePortfolioUseCaseWoContextReceivers {
-    fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId
+interface CreatePortfolioUseCaseWithContextReceivers {
+    context(Raise<DomainError>)
+    fun createPortfolio(model: CreatePortfolio): PortfolioId
 }
 
-fun createPortfolioUseCaseWoContextReceivers(): CreatePortfolioUseCaseWoContextReceivers =
-    object : CreatePortfolioUseCaseWoContextReceivers {
-        override fun Raise<DomainError>.createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
+fun createPortfolioUseCaseWithContextReceivers(): CreatePortfolioUseCaseWithContextReceivers =
+    object : CreatePortfolioUseCaseWithContextReceivers {
+        context(Raise<DomainError>)
+        override fun createPortfolio(model: CreatePortfolio): PortfolioId = PortfolioId("1")
     }
 
 fun main() {
